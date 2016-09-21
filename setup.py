@@ -151,6 +151,9 @@ qt_qmake = which(qt_qmake)
 if qt_qmake is None:
     raise RuntimeError('Unable to locate Qt4 qmake')
 
+
+src_dir = pjoin(os.path.dirname(os.path.abspath(__file__)), 'src')
+
 extra_compile_args = []
 extra_link_args = []
 include_dirs = []
@@ -229,6 +232,7 @@ class build_pyqt_ext(sipdistutils.build_ext):
     def finalize_options(self):
         sipdistutils.build_ext.finalize_options(self)
         self.sip_opts = self.sip_opts + site_cfg.pyqt_conf.sip_flags
+        self.sip_opts += '-I./src'
 
     def build_extension(self, ext):
         if not isinstance(ext, PyQt4Extension):
@@ -244,7 +248,7 @@ class build_pyqt_ext(sipdistutils.build_ext):
             if os.path.exists(header):
                 moc_file = os.path.basename(header).replace(".h", ".moc")
                 out_file = os.path.join(self.build_temp, moc_file)
-                call_arg = ["moc", "-o", out_file, header]
+                call_arg = [qt_moc, "-o", out_file, header]
                 spawn.spawn(call_arg, dry_run=self.dry_run)
 
         # Add the temp build directory to include path, for compiler to find
@@ -279,7 +283,7 @@ class build_pyqt_ext(sipdistutils.build_ext):
         if site_cfg.pyqt_conf.sip_dir:
             return site_cfg.pyqt_conf.sip_dir
 
-        if os.path.isdir(pyqt_sip_dir):
+        if pyqt_sip_dir is not None and os.path.isdir(pyqt_sip_dir):
             return pyqt_sip_dir
 
         log.warn("The default sip include directory %r does not exist" % pyqt_sip_dir)
@@ -295,7 +299,7 @@ class build_pyqt_ext(sipdistutils.build_ext):
 
 
 def get_source_files(path, ext="cpp", exclude=tuple()):
-    files = glob.glob(os.path.join(path, "*." + ext))
+    files = glob.glob(os.path.join(path, "**/*." + ext), recursive=True)
     files = [f for f in files if os.path.basename(f) not in exclude]
     return files
 
@@ -324,11 +328,12 @@ if sys.platform == "win32":
     # Qt libs on windows have a 4 added
     qt_libs = [lib + "4" for lib in qt_libs]
 
-include_dirs += [numpy.get_include(), "./"]
+include_dirs += [numpy.get_include(), "./", "./src"]
+source_files = get_source_files("./src", "cpp")
+print('Cpp source files:', source_files)
 
 pyqthelp_ext = PyQt4Extension("pyqthelp",
-                              ["pyqthelp.sip"] + \
-                              get_source_files("", "cpp"),
+                              ["pyqthelp.sip"] + source_files,
                               include_dirs=include_dirs,
                               extra_compile_args=extra_compile_args,
                               extra_link_args=extra_link_args,
@@ -348,5 +353,4 @@ def setup_package():
           cmdclass={"build_ext": build_pyqt_ext},)
 
 if __name__ == '__main__':
-    #setup_package()
-    pass
+    setup_package()
