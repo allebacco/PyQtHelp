@@ -15,7 +15,6 @@ from distutils.core import Extension
 from distutils import dir_util, spawn, log
 
 import glob
-import numpy
 
 import sipdistutils
 
@@ -232,7 +231,12 @@ class build_pyqt_ext(sipdistutils.build_ext):
     def finalize_options(self):
         sipdistutils.build_ext.finalize_options(self)
         self.sip_opts = self.sip_opts + site_cfg.pyqt_conf.sip_flags
-        self.sip_opts += '-I./src'
+        self.sip_opts += ['-I./src ', '-e']
+
+        import numpy
+        import pybind11
+        self.sip_opts += ['-I%s ' % numpy.get_include()]
+        self.sip_opts += ['-I%s ' % pybind11.get_include()]
 
     def build_extension(self, ext):
         if not isinstance(ext, PyQt4Extension):
@@ -251,9 +255,11 @@ class build_pyqt_ext(sipdistutils.build_ext):
                 call_arg = [qt_moc, "-o", out_file, header]
                 spawn.spawn(call_arg, dry_run=self.dry_run)
 
+        import numpy
+        import pybind11
         # Add the temp build directory to include path, for compiler to find
         # the created .moc files
-        ext.include_dirs = ext.include_dirs + [self.build_temp]
+        ext.include_dirs = ext.include_dirs + [numpy.get_include(), pybind11.get_include(), self.build_temp]
 
         sipdistutils.build_ext.build_extension(self, ext)
 
@@ -328,7 +334,7 @@ if sys.platform == "win32":
     # Qt libs on windows have a 4 added
     qt_libs = [lib + "4" for lib in qt_libs]
 
-include_dirs += [numpy.get_include(), "./", "./src"]
+include_dirs += ["./", "./src"]
 source_files = get_source_files("./src", "cpp")
 print('Cpp source files:', source_files)
 
@@ -350,7 +356,8 @@ def setup_package():
           url=URL,
           license=LICENSE,
           ext_modules=[pyqthelp_ext],
-          cmdclass={"build_ext": build_pyqt_ext},)
+          cmdclass={"build_ext": build_pyqt_ext},
+          install_requires=['numpy', 'pybind11'])
 
 if __name__ == '__main__':
     setup_package()

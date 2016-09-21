@@ -3,6 +3,7 @@
 
 %ModuleCode
 #include "transform.h"
+#include <stdexcept>
 %End
 
-QTransform inverted(const QTransform& tr, bool *invertible=nullptr);
+QTransform inverted(const QTransform& tr, bool *invertible=nullptr) throw(std::runtime_error);
