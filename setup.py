@@ -340,7 +340,7 @@ print('Cpp source files:', source_files)
 pyqthelp_ext = PyQt4Extension("pyqthelp",
                               ["pyqthelp.sip"] + source_files,
                               include_dirs=include_dirs,
-                              extra_compile_args=extra_compile_args,
+                              extra_compile_args=extra_compile_args + ['/fp:strict'],
                               extra_link_args=extra_link_args,
                               libraries=qt_libs,
                               library_dirs=library_dirs)
@@ -356,7 +356,9 @@ def setup_package():
           license=LICENSE,
           ext_modules=[pyqthelp_ext],
           cmdclass={"build_ext": build_pyqt_ext},
-          install_requires=['numpy'])
+          install_requires=['numpy'],
+          setup_requires=['pytest-runner'],
+          tests_require=['pytest'],)
 
 if __name__ == '__main__':
     setup_package()
