@@ -256,10 +256,9 @@ class build_pyqt_ext(sipdistutils.build_ext):
                 spawn.spawn(call_arg, dry_run=self.dry_run)
 
         import numpy
-        import pybind11
         # Add the temp build directory to include path, for compiler to find
         # the created .moc files
-        ext.include_dirs = ext.include_dirs + [numpy.get_include(), pybind11.get_include(), self.build_temp]
+        ext.include_dirs = ext.include_dirs + [numpy.get_include(), self.build_temp]
 
         sipdistutils.build_ext.build_extension(self, ext)
 
@@ -357,7 +356,7 @@ def setup_package():
           license=LICENSE,
           ext_modules=[pyqthelp_ext],
           cmdclass={"build_ext": build_pyqt_ext},
-          install_requires=['numpy', 'pybind11'])
+          install_requires=['numpy'])
 
 if __name__ == '__main__':
     setup_package()
