@@ -337,10 +337,15 @@ include_dirs += ["./", "./src"]
 source_files = get_source_files("./src", "cpp")
 print('Cpp source files:', source_files)
 
+if os.name == "nt":
+    extra_compile_args += ['/fp:precise']
+else:
+    extra_compile_args += ['-std=c++11']
+
 pyqthelp_ext = PyQt4Extension("pyqthelp",
                               ["pyqthelp.sip"] + source_files,
                               include_dirs=include_dirs,
-                              extra_compile_args=extra_compile_args + ['/fp:strict'],
+                              extra_compile_args=extra_compile_args,
                               extra_link_args=extra_link_args,
                               libraries=qt_libs,
                               library_dirs=library_dirs)

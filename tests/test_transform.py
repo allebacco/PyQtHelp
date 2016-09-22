@@ -25,17 +25,17 @@ def assert_transform_array_equals(qtransform, ndarray):
     print(qtransform.m32() - ndarray[2, 1])
     print(qtransform.m33() - ndarray[2, 2])
 
-    assert np.abs(qtransform.m11() - ndarray[0, 0]) < 1e-13 
-    assert np.abs(qtransform.m12() - ndarray[0, 1]) < 1e-13 
-    assert np.abs(qtransform.m13() - ndarray[0, 2]) < 1e-13 
+    assert np.abs(qtransform.m11() - ndarray[0, 0]) < 1e-13
+    assert np.abs(qtransform.m12() - ndarray[0, 1]) < 1e-13
+    assert np.abs(qtransform.m13() - ndarray[0, 2]) < 1e-13
 
-    assert np.abs(qtransform.m21() - ndarray[1, 0]) < 1e-13 
-    assert np.abs(qtransform.m22() - ndarray[1, 1]) < 1e-13 
-    assert np.abs(qtransform.m23() - ndarray[1, 2]) < 1e-13 
+    assert np.abs(qtransform.m21() - ndarray[1, 0]) < 1e-13
+    assert np.abs(qtransform.m22() - ndarray[1, 1]) < 1e-13
+    assert np.abs(qtransform.m23() - ndarray[1, 2]) < 1e-13
 
-    assert np.abs(qtransform.m31() - ndarray[2, 0]) < 1e-13 
-    assert np.abs(qtransform.m32() - ndarray[2, 1]) < 1e-13 
-    assert np.abs(qtransform.m33() - ndarray[2, 2]) < 1e-13 
+    assert np.abs(qtransform.m31() - ndarray[2, 0]) < 1e-13
+    assert np.abs(qtransform.m32() - ndarray[2, 1]) < 1e-13
+    assert np.abs(qtransform.m33() - ndarray[2, 2]) < 1e-13
 
 
 def make_array(data):

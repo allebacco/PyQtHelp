@@ -17,13 +17,39 @@ public:
         mData(nullptr)
     {}
 
-    NDArray(PyObject* ndarray) throw(std::runtime_error):
+    NDArray(PyObject* ndarray, const bool acquireRef=true) throw(std::runtime_error):
         mDtype(NPY_VOID),
         mNdArray(nullptr),
         mNDims(0),
         mData(nullptr)
     {
         acquire(ndarray);
+    }
+
+    NDArray(const NDArray& other):
+        mDtype(other.mDtype),
+        mNdArray(other.mNdArray),
+        mNDims(other.mNDims),
+        mData(other.mData)
+    {
+        Py_XINCREF(mNdArray);
+    }
+
+    NDArray(NDArray&& other):
+        mDtype(other.mDtype),
+        mNdArray(other.mNdArray),
+        mNDims(other.mNDims),
+        mData(other.mData)
+    {
+        mDtype = other.mDtype;
+        mNdArray = other.mNdArray;
+        mNDims = other.mNDims;
+        mData = other.mData;
+
+        other.mDtype = NPY_VOID;
+        other.mNdArray = nullptr;
+        other.mNDims = 0;
+        other.mData = nullptr;
     }
 
     ~NDArray()
@@ -34,6 +60,24 @@ public:
     void operator=(PyObject* ndarray) throw(std::runtime_error)
     {
         acquire(ndarray);
+    }
+
+    void operator=(const NDArray& other) throw(std::runtime_error)
+    {
+        acquire(other.mNdArray);
+    }
+
+    void operator=(NDArray&& other)
+    {
+        mDtype = other.mDtype;
+        mNdArray = other.mNdArray;
+        mNDims = other.mNDims;
+        mData = other.mData;
+
+        other.mDtype = NPY_VOID;
+        other.mNdArray = nullptr;
+        other.mNDims = 0;
+        other.mData = nullptr;
     }
 
     void release()
@@ -73,17 +117,24 @@ public:
         return static_cast<const _Tp*>(mData);
     }
 
+    NDArray convertTo(const int typenum) const;
+
+    static NDArray empty_like(const NDArray& other, int typenum=NPY_VOID); 
+
 protected:
 
     void acquire(PyObject* ndarray) throw(std::runtime_error)
     {
+        release(); // release the previous data
+        
+        if(ndarray==nullptr)
+            return;
+
         if(!PyArray_Check(ndarray))
             throw std::runtime_error("Object is not Numpy Array");
 
-        release(); // release the previous data
-
         if(PyArray_IS_C_CONTIGUOUS((PyArrayObject*)ndarray)==0)
-            throw std::runtime_error("Numpy array must be contiguous");
+            throw std::runtime_error("Numpy array must be C contiguous");
 
         mNDims = PyArray_NDIM((PyArrayObject*)ndarray);
         mDtype = PyArray_TYPE((PyArrayObject*)ndarray);
