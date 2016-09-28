@@ -24,7 +24,7 @@ PathConnect decodeConnect(PyObject* pyConnect, const PathConnect defaultvalue)
         return PathConnect::Finite;
     if(connect=="pairs")
         return PathConnect::Pairs;
-    
+
     return defaultvalue;
 }
 
@@ -145,7 +145,7 @@ QPainterPath arrayToQPath(PyObject* x, PyObject* y, PyObject* connect=Py_None);
         if(PyUnicode_Check(pyConnect))
             connect = PyString_AsString(pyConnect);
 
-        
+
 
     } catch(const std::runtime_error& err) {
         PyErr_SetString(PyExc_RuntimeError, err.what());

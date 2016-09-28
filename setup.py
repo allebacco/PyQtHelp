@@ -3,6 +3,7 @@
 import os
 import sys
 import shlex
+import fnmatch
 from collections import namedtuple
 try:
     from ConfigParser import SafeConfigParser
@@ -62,7 +63,7 @@ if pyqtconfig is not None:
     pyqt_sip_flags = cfg.pyqt_sip_flags
 
     qt_dir = cfg.qt_dir
-    qt_bin_dir = cfg.qt_dir
+    qt_bin_dir = pjoin(cfg.qt_dir, 'bin')
     qt_include_dir = cfg.qt_inc_dir
     qt_lib_dir = cfg.qt_lib_dir
     qt_framework = bool(cfg.qt_framework)
@@ -98,8 +99,8 @@ if "QTDIR" in os.environ:
         qt_include_dir = pjoin(qt_dir, "include")
         qt_lib_dir = pjoin(qt_dir, "lib")
         qt_framework_dir = qt_dir
-    
-    qt_bin_dir = qt_dir
+
+    qt_bin_dir = pjoin(qt_dir, 'bin')
 
 
 if qt_framework is False:
@@ -137,6 +138,7 @@ def which(name):
 
     return None
 
+print('qt_bin_dir', qt_bin_dir)
 
 if qt_moc is None:
     qt_moc = 'moc' if qt_bin_dir is None else pjoin(qt_bin_dir, 'moc')
@@ -304,9 +306,15 @@ class build_pyqt_ext(sipdistutils.build_ext):
 
 
 def get_source_files(path, ext="cpp", exclude=tuple()):
-    files = glob.glob(os.path.join(path, "**/*." + ext), recursive=True)
-    files = [f for f in files if os.path.basename(f) not in exclude]
-    return files
+    out_files = list()
+    for root, dirs, files in os.walk(path):
+        for basename in files:
+            if fnmatch.fnmatch(basename, ext):
+                filename = os.path.join(root, basename)
+                out_files.append(filename)
+
+    out_files = [f for f in out_files if os.path.basename(f) not in exclude]
+    return out_files
 
 
 # Used Qt4 libraries
@@ -334,13 +342,15 @@ if sys.platform == "win32":
     qt_libs = [lib + "4" for lib in qt_libs]
 
 include_dirs += ["./", "./src"]
-source_files = get_source_files("./src", "cpp")
+source_files = get_source_files("./src", "*.cpp")
 print('Cpp source files:', source_files)
 
 if os.name == "nt":
     extra_compile_args += ['/fp:precise']
 else:
     extra_compile_args += ['-std=c++11']
+
+print('source_files', source_files)
 
 pyqthelp_ext = PyQt4Extension("pyqthelp",
                               ["pyqthelp.sip"] + source_files,

@@ -69,7 +69,7 @@ def test_invert_works_correctly(data):
     assert ok_ph == ok_ph2
     assert ok_np == ok_ph
 
-    #assert transform_inv == transform_inv2
+    assert transform_inv == transform_inv2
 
     assert_transform_array_equals(transform_inv, array_inv)
     assert_transform_array_equals(transform_inv2, array_inv)
