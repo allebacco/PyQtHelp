@@ -1,7 +1,7 @@
 #include "transform.h"
 
 
-QTransform inverted(const QTransform& tr, bool* invertible=nullptr)
+QTransform invertTransform(const QTransform& tr, bool* invertible=nullptr)
 {
     if(invertible!=nullptr)
         *invertible = false;

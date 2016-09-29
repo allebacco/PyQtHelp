@@ -32,98 +32,79 @@ PathConnect decodeConnect(PyObject* pyConnect, const PathConnect defaultvalue)
 QPainterPath arrayToQPathImpl(const NDArray& x, const NDArray& y, const PathConnect connect)
 {
     if(x.dtype()==NPY_INT64 && y.dtype()==NPY_FLOAT64)
-    {
-        sipRes = new QPainterPath(arrayToQPath(x.data<int64_t>(), y.data<double>(), x.shape(0), connect));
-    }
-    else
-    {
-        if(x.dtype()!=y.dtype())
-            throw std::runtime_error("x and y have not the same dtype");
+        return arrayToQPath(x.data<int64_t>(), y.data<double>(), x.shape(0), connect);
 
-        switch (x.dtype()) {
-            case NPY_FLOAT64:
-                sipRes = new QPainterPath(arrayToQPath(x.data<double>(), y.data<double>(), x.shape(0), connect));
-                break;
-            case NPY_FLOAT32:
-                sipRes = new QPainterPath(arrayToQPath(x.data<float>(), y.data<float>(), x.shape(0), connect));
-                break;
-            case NPY_UINT8:
-                sipRes = new QPainterPath(arrayToQPath(x.data<uint8_t>(), y.data<uint8_t>(), x.shape(0), connect));
-                break;
-            case NPY_INT16:
-                sipRes = new QPainterPath(arrayToQPath(x.data<int16_t>(), y.data<int16_t>(), x.shape(0), connect));
-                break;
-            case NPY_UINT16:
-                sipRes = new QPainterPath(arrayToQPath(x.data<uint16_t>(), y.data<uint16_t>(), x.shape(0), connect));
-                break;
-            case NPY_INT32:
-                sipRes = new QPainterPath(arrayToQPath(x.data<int32_t>(), y.data<int32_t>(), x.shape(0), connect));
-                break;
-            case NPY_UINT32:
-                sipRes = new QPainterPath(arrayToQPath(x.data<uint32_t>(), y.data<uint32_t>(), x.shape(0), connect));
-                break;
-            case NPY_INT64:
-                sipRes = new QPainterPath(arrayToQPath(x.data<int64_t>(), y.data<int64_t>(), x.shape(0), connect));
-                break;
-            case NPY_UINT64:
-                sipRes = new QPainterPath(arrayToQPath(x.data<uint64_t>(), y.data<uint64_t>(), x.shape(0), connect));
-                break;
-            default:
-                throw std::runtime_error("x and y have unsupported dtype");
-        }
+    if(x.dtype()!=y.dtype())
+        throw std::runtime_error("x and y have not the same dtype");
+
+    switch (x.dtype()) {
+        case NPY_FLOAT64:
+            return arrayToQPath(x.data<double>(), y.data<double>(), x.shape(0), connect);
+            break;
+        case NPY_FLOAT32:
+            return arrayToQPath(x.data<float>(), y.data<float>(), x.shape(0), connect);
+            break;
+        case NPY_INT32:
+            return arrayToQPath(x.data<int32_t>(), y.data<int32_t>(), x.shape(0), connect);
+            break;
+        case NPY_UINT32:
+            return arrayToQPath(x.data<uint32_t>(), y.data<uint32_t>(), x.shape(0), connect);
+            break;
+        case NPY_INT64:
+            return arrayToQPath(x.data<int64_t>(), y.data<int64_t>(), x.shape(0), connect);
+            break;
+        case NPY_UINT64:
+            return arrayToQPath(x.data<uint64_t>(), y.data<uint64_t>(), x.shape(0), connect);
+            break;
+        default:
+            throw std::runtime_error("x and y have unsupported dtype");
     }
 }
 
 
 QPainterPath arrayToQPathImpl(const NDArray& x, const NDArray& y, const NDArray& connect)
 {
-    if(x.dtype()==NPY_INT64 && y.dtype()==NPY_FLOAT64)
-    {
-        sipRes = new QPainterPath(arrayToQPath(x.data<int64_t>(), y.data<double>(), x.shape(0), connect));
-    }
-    else
-    {
-        if(x.dtype()!=y.dtype())
-            throw std::runtime_error("x and y have not the same dtype");
+    if(connect.dtype()!=NPY_UINT8 && connect.dtype()!=NPY_INT8 &&
+       connect.dtype()!=NPY_BOOL)
+        throw std::runtime_error("connect must be a bool array");
 
-        switch (x.dtype()) {
-            case NPY_FLOAT64:
-                sipRes = new QPainterPath(arrayToQPath(x.data<double>(), y.data<double>(), x.shape(0), connect));
-                break;
-            case NPY_FLOAT32:
-                sipRes = new QPainterPath(arrayToQPath(x.data<float>(), y.data<float>(), x.shape(0), connect));
-                break;
-            case NPY_UINT8:
-                sipRes = new QPainterPath(arrayToQPath(x.data<uint8_t>(), y.data<uint8_t>(), x.shape(0), connect));
-                break;
-            case NPY_INT16:
-                sipRes = new QPainterPath(arrayToQPath(x.data<int16_t>(), y.data<int16_t>(), x.shape(0), connect));
-                break;
-            case NPY_UINT16:
-                sipRes = new QPainterPath(arrayToQPath(x.data<uint16_t>(), y.data<uint16_t>(), x.shape(0), connect));
-                break;
-            case NPY_INT32:
-                sipRes = new QPainterPath(arrayToQPath(x.data<int32_t>(), y.data<int32_t>(), x.shape(0), connect));
-                break;
-            case NPY_UINT32:
-                sipRes = new QPainterPath(arrayToQPath(x.data<uint32_t>(), y.data<uint32_t>(), x.shape(0), connect));
-                break;
-            case NPY_INT64:
-                sipRes = new QPainterPath(arrayToQPath(x.data<int64_t>(), y.data<int64_t>(), x.shape(0), connect));
-                break;
-            case NPY_UINT64:
-                sipRes = new QPainterPath(arrayToQPath(x.data<uint64_t>(), y.data<uint64_t>(), x.shape(0), connect));
-                break;
-            default:
-                throw std::runtime_error("x and y have unsupported dtype");
-        }
+    if(connect.ndims()!=1 || connect.shape(0)!=x.shape(0)-1)
+        throw std::runtime_error("connect must be a monodimensional array of size x.size-1");
+
+    if(x.dtype()==NPY_INT64 && y.dtype()==NPY_FLOAT64)
+        return arrayToQPath(x.data<int64_t>(), y.data<double>(), x.shape(0), connect.data<uint8_t>());
+
+    if(x.dtype()!=y.dtype())
+        throw std::runtime_error("x and y have not the same dtype");
+
+    switch (x.dtype()) {
+        case NPY_FLOAT64:
+            return arrayToQPath(x.data<double>(), y.data<double>(), x.shape(0), connect.data<uint8_t>());
+            break;
+        case NPY_FLOAT32:
+            return arrayToQPath(x.data<float>(), y.data<float>(), x.shape(0), connect.data<uint8_t>());
+            break;
+        case NPY_INT32:
+            return arrayToQPath(x.data<int32_t>(), y.data<int32_t>(), x.shape(0), connect.data<uint8_t>());
+            break;
+        case NPY_UINT32:
+            return arrayToQPath(x.data<uint32_t>(), y.data<uint32_t>(), x.shape(0), connect.data<uint8_t>());
+            break;
+        case NPY_INT64:
+            return arrayToQPath(x.data<int64_t>(), y.data<int64_t>(), x.shape(0), connect.data<uint8_t>());
+            break;
+        case NPY_UINT64:
+            return arrayToQPath(x.data<uint64_t>(), y.data<uint64_t>(), x.shape(0), connect.data<uint8_t>());
+            break;
+        default:
+            throw std::runtime_error("x and y have unsupported dtype");
     }
 }
 
 
 %End
 
-/*
+
 QPainterPath arrayToQPath(PyObject* x, PyObject* y, PyObject* connect=Py_None);
 %MethodCode
     PyObject* pyX = a0;
@@ -136,16 +117,21 @@ QPainterPath arrayToQPath(PyObject* x, PyObject* y, PyObject* connect=Py_None);
         NDArray y(pyY);
 
         if(x.ndims()!=1 || y.ndims()!=1)
-            throw std::runtime_error("x and y has ndims != 1");
+            throw std::runtime_error("x and y must be monodimensional");
 
         if(x.shape(0)!=y.shape(0))
-            throw std::runtime_error("x and y different shape");
-
+            throw std::runtime_error("x and y must have the same size");
 
         if(PyUnicode_Check(pyConnect))
-            connect = PyString_AsString(pyConnect);
-
-
+        {
+            const PathConnect connect = decodeConnect(pyConnect, PathConnect::All);
+            sipRes = new QPainterPath(arrayToQPathImpl(x, y, connect));
+        }
+        else
+        {
+            NDArray connectArray(pyConnect);
+            sipRes = new QPainterPath(arrayToQPathImpl(x, y, connectArray));
+        }
 
     } catch(const std::runtime_error& err) {
         PyErr_SetString(PyExc_RuntimeError, err.what());
@@ -153,4 +139,3 @@ QPainterPath arrayToQPath(PyObject* x, PyObject* y, PyObject* connect=Py_None);
     }
 
 %End
-*/

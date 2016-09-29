@@ -1,4 +1,4 @@
-%Module pyqthelp
+%Module native
 
 %Import QtCore/QtCoremod.sip
 %Import QtGui/QtGuimod.sip
@@ -24,3 +24,4 @@ init_package();
 
 %Include src/exceptions.sip
 %Include src/transform.sip
+%Include src/painterpath.sip

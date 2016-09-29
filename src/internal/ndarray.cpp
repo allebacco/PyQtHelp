@@ -10,6 +10,27 @@
 
 #include <vector>
 
+void NDArray::acquire(PyObject* ndarray)
+{
+    release(); // release the previous data
+    
+    if(ndarray==nullptr)
+        return;
+
+    if(!PyArray_Check(ndarray))
+        throw std::runtime_error("Object is not Numpy Array");
+
+    if(PyArray_IS_C_CONTIGUOUS((PyArrayObject*)ndarray)==0)
+        throw std::runtime_error("Numpy array must be C contiguous");
+
+    mNDims = PyArray_NDIM((PyArrayObject*)ndarray);
+    mDtype = PyArray_TYPE((PyArrayObject*)ndarray);
+    mData = PyArray_DATA((PyArrayObject*)ndarray);
+
+    mNdArray = ndarray;
+    Py_INCREF(mNdArray);
+}
+
 NDArray NDArray::convertTo(const int typenum) const
 {
     if(mDtype==typenum)
@@ -30,7 +51,7 @@ NDArray NDArray::empty_like(const NDArray& other, int typenum)
     for(size_t i=0; i<other.ndims(); ++i)
         dims.push_back(other.shape(i));
 
-    PyObject* py_out = PyArray_EMPTY(other.ndims(), dims.data(), typenum, 0);
+    PyObject* py_out = PyArray_EMPTY(static_cast<int>(other.ndims()), dims.data(), typenum, 0);
     NDArray out(py_out);
     // release a reference because the NDArray has already taken one
     Py_XDECREF(py_out);

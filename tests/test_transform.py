@@ -62,7 +62,7 @@ def test_invert_works_correctly(data):
     transform = make_transform(data)
 
     array_inv, ok_np = invert_numpy_array(make_array(data))
-    transform_inv, ok_ph = ph.inverted(transform)
+    transform_inv, ok_ph = ph.native.invertTransform(transform)
 
     transform_inv2, ok_ph2 = transform.inverted()
 

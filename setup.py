@@ -352,7 +352,7 @@ else:
 
 print('source_files', source_files)
 
-pyqthelp_ext = PyQt4Extension("pyqthelp",
+pyqthelp_ext = PyQt4Extension("pyqthelp.native",
                               ["pyqthelp.sip"] + source_files,
                               include_dirs=include_dirs,
                               extra_compile_args=extra_compile_args,

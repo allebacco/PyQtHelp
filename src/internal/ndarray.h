@@ -17,7 +17,7 @@ public:
         mData(nullptr)
     {}
 
-    NDArray(PyObject* ndarray, const bool acquireRef=true) throw(std::runtime_error):
+    NDArray(PyObject* ndarray, const bool acquireRef=true) :
         mDtype(NPY_VOID),
         mNdArray(nullptr),
         mNDims(0),
@@ -57,12 +57,12 @@ public:
         release();
     }
 
-    void operator=(PyObject* ndarray) throw(std::runtime_error)
+    void operator=(PyObject* ndarray)
     {
         acquire(ndarray);
     }
 
-    void operator=(const NDArray& other) throw(std::runtime_error)
+    void operator=(const NDArray& other)
     {
         acquire(other.mNdArray);
     }
@@ -93,11 +93,11 @@ public:
         return mNDims;
     }
 
-    size_t shape(const size_t i=0) const throw(std::runtime_error)
+    size_t shape(const size_t i=0) const
     {
         if(i>=mNDims)
              throw std::runtime_error("Index error in ndarray.shape");
-        return PyArray_DIM((PyArrayObject*)mNdArray, i);
+        return PyArray_DIM(reinterpret_cast<PyArrayObject*>(mNdArray), static_cast<int>(i));
     }
 
     int dtype() const
@@ -123,27 +123,7 @@ public:
 
 protected:
 
-    void acquire(PyObject* ndarray) throw(std::runtime_error)
-    {
-        release(); // release the previous data
-        
-        if(ndarray==nullptr)
-            return;
-
-        if(!PyArray_Check(ndarray))
-            throw std::runtime_error("Object is not Numpy Array");
-
-        if(PyArray_IS_C_CONTIGUOUS((PyArrayObject*)ndarray)==0)
-            throw std::runtime_error("Numpy array must be C contiguous");
-
-        mNDims = PyArray_NDIM((PyArrayObject*)ndarray);
-        mDtype = PyArray_TYPE((PyArrayObject*)ndarray);
-        mData = PyArray_DATA((PyArrayObject*)ndarray);
-
-        mNdArray = ndarray;
-        Py_INCREF(mNdArray);
-    }
-
+    void acquire(PyObject* ndarray);
 
 protected:
     int mDtype;

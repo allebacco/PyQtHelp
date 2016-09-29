@@ -5,12 +5,23 @@
 #include <QtGui/QPainterPath>
 
 
+#if defined _MSC_VER
+#pragma message("Compiling isfinite() workaround")
+// Workaround for the absence of isfinite for integer types in MSVC
+int fpclassify(int32_t v) { return FP_NORMAL; }
+int fpclassify(uint32_t v) { return FP_NORMAL; }
+int fpclassify(int64_t v) { return FP_NORMAL; }
+int fpclassify(uint64_t v) { return FP_NORMAL; }
+#endif
+
+
+
 enum class PathConnect
 {
     All,
     Finite,
     Pairs
-}
+};
 
 
 template<typename _TpX, typename _TpY>
@@ -40,6 +51,8 @@ static void arrayToQPathPairs(const _TpX* x, const _TpY* y, const size_t size, Q
 template<typename _TpX, typename _TpY>
 static void arrayToQPathFinite(const _TpX* x, const _TpY* y, const size_t size, QPainterPath& path)
 {
+    //using std::isfinite;
+
     bool skip = true;
     for(size_t i=0; i<size; ++i)
     {
@@ -75,6 +88,26 @@ static QPainterPath arrayToQPath(const _TpX* x, const _TpY* y, const size_t size
             case PathConnect::Pairs:
                 arrayToQPathPairs(x, y, size, path);
                 break;
+        }
+    }
+    return path;
+}
+
+
+template<typename _TpX, typename _TpY>
+static QPainterPath arrayToQPath(const _TpX* x, const _TpY* y, const size_t size, const uint8_t* connect)
+{
+    QPainterPath path;
+    if(size>0)
+    {
+        path.moveTo(x[0], y[0]);
+        bool skip = true;
+        for(size_t i=1; i<size; ++i)
+        {
+            if(connect[i]!=0)
+                path.lineTo(x[i], y[i]);
+            else
+                path.moveTo(x[i], y[i]);
         }
     }
     return path;
