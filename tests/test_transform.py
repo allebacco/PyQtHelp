@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from PyQt4.QtGui import QTransform
+from PyQt5.QtGui import QTransform
 
 import pyqthelp as ph
 

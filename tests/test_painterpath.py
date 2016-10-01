@@ -2,7 +2,7 @@
 import pytest
 import numpy as np
 
-from PyQt4.QtGui import QPainterPath
+from PyQt5.QtGui import QPainterPath
 
 import pyqthelp as ph
 

@@ -2,7 +2,7 @@
 #define PAINTERPATH_H
 
 #include <cmath>
-#include <QtGui/QPainterPath>
+#include <QPainterPath>
 
 
 #if defined _MSC_VER

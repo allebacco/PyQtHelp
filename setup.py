@@ -11,24 +11,13 @@ except ImportError:
     from configparser import SafeConfigParser
 
 from setuptools import setup
-
 from distutils.core import Extension
 from distutils import dir_util, spawn, log
 
 import glob
 
 import sipdistutils
-
-
-try:
-    from PyQt4 import pyqtconfig
-except ImportError:
-    pyqtconfig = None
-
-try:
-    from PyQt4.QtCore import PYQT_CONFIGURATION
-except ImportError:
-    PYQT_CONFIGURATION = None
+from PyQt5.QtCore import PYQT_CONFIGURATION
 
 pjoin = os.path.join
 
@@ -47,7 +36,7 @@ qt_conf = namedtuple("qt_conf", ["prefix", "include_dir", "library_dir", "framew
 config = namedtuple("config", ["sip", "pyqt_conf", "qt_conf"])
 
 pyqt_sip_dir = None
-pyqt_sip_flags = None
+pyqt_sip_flags = PYQT_CONFIGURATION["sip_flags"]
 
 qt_dir = None
 qt_include_dir = None
@@ -55,25 +44,8 @@ qt_lib_dir = None
 qt_bin_dir = None
 qt_framework = False
 qt_framework_dir = None
-
-# use PyQt4 build time config if provided
-if pyqtconfig is not None:
-    cfg = pyqtconfig.Configuration()
-    pyqt_sip_dir = cfg.pyqt_sip_dir
-    pyqt_sip_flags = cfg.pyqt_sip_flags
-
-    qt_dir = cfg.qt_dir
-    qt_bin_dir = pjoin(cfg.qt_dir, 'bin')
-    qt_include_dir = cfg.qt_inc_dir
-    qt_lib_dir = cfg.qt_lib_dir
-    qt_framework = bool(cfg.qt_framework)
-    qt_framework_dir = qt_lib_dir
-
-elif PYQT_CONFIGURATION is not None:
-    pyqt_sip_flags = PYQT_CONFIGURATION["sip_flags"]
-
-qt_moc = None
-qt_qmake = None
+qt_moc = 'moc'
+qt_qmake = 'qmake'
 
 if 'MOC' in os.environ:
     qt_moc = os.environ['MOC']
@@ -85,7 +57,7 @@ if "QTDIR" in os.environ:
     qt_dir = os.environ["QTDIR"]
     if sys.platform == "darwin":
         if glob.glob(pjoin(qt_dir, "lib", "Qt*.framework")):
-            # This is the standard Qt4 framework layout
+            # This is the standard Qt framework layout
             qt_framework = True
             qt_framework_dir = pjoin(qt_dir, "lib")
         elif glob.glob(pjoin(qt_dir, "Frameworks", "Qt*.framework")):
@@ -119,9 +91,9 @@ if qt_framework is False:
         qt_include_dir = conf_parser.get('Paths', 'Headers')
         qt_framework_dir = qt_bin_dir
         if qt_moc is None:
-            qt_moc = pjoin(qt_bin_dir, 'moc-qt4')
+            qt_moc = pjoin(qt_bin_dir, 'moc')
         if qt_qmake is None:
-            qt_qmake = pjoin(qt_bin_dir, 'qmake-qt4')
+            qt_qmake = pjoin(qt_bin_dir, 'qmake')
 
 
 def which(name):
@@ -138,20 +110,12 @@ def which(name):
 
     return None
 
-print('qt_bin_dir', qt_bin_dir)
-
-if qt_moc is None:
-    qt_moc = 'moc' if qt_bin_dir is None else pjoin(qt_bin_dir, 'moc')
-if qt_qmake is None:
-    qt_qmake = 'qmake' if qt_bin_dir is None else pjoin(qt_bin_dir, 'qmake')
-
 qt_moc = which(qt_moc)
 if qt_moc is None:
-    raise RuntimeError('Unable to locate Qt4 moc')
+    raise RuntimeError('Unable to locate Qt moc')
 qt_qmake = which(qt_qmake)
 if qt_qmake is None:
-    raise RuntimeError('Unable to locate Qt4 qmake')
-
+    raise RuntimeError('Unable to locate Qt qmake')
 
 src_dir = pjoin(os.path.dirname(os.path.abspath(__file__)), 'src')
 
@@ -203,6 +167,9 @@ def site_config():
     include_dir = path_list(include_dir)
     library_dir = path_list(library_dir)
 
+    for d in ['QtCore', 'QtGui']:
+        include_dir.append(pjoin(qt_include_dir, d))
+
     conf = config(sip_bin, pyqt_conf(sip_flags, sip_dir),
                   qt_conf(prefix, include_dir, library_dir, framework, framework_dir))
     return conf
@@ -220,15 +187,15 @@ else:
     sip_plaftorm_tag = ""
 
 
-class PyQt4Extension(Extension):
+class PyQt5Extension(Extension):
     pass
 
 
 class build_pyqt_ext(sipdistutils.build_ext):
     """
-    A build_ext command for building PyQt4 sip based extensions
+    A build_ext command for building PyQt5 sip based extensions
     """
-    description = "Build a orangeqt PyQt4 extension."
+    description = "Build a orangeqt PyQ5 extension."
 
     def finalize_options(self):
         sipdistutils.build_ext.finalize_options(self)
@@ -236,12 +203,10 @@ class build_pyqt_ext(sipdistutils.build_ext):
         self.sip_opts += ['-I./src ', '-e']
 
         import numpy
-        import pybind11
         self.sip_opts += ['-I%s ' % numpy.get_include()]
-        self.sip_opts += ['-I%s ' % pybind11.get_include()]
 
     def build_extension(self, ext):
-        if not isinstance(ext, PyQt4Extension):
+        if not isinstance(ext, PyQt5Extension):
             return
 
         cppsources = [source for source in ext.sources if source.endswith(".cpp")]
@@ -295,8 +260,8 @@ class build_pyqt_ext(sipdistutils.build_ext):
 
         log.warn("The default sip include directory %r does not exist" % pyqt_sip_dir)
 
-        candidate_sipfiles_dirs = [pjoin(sys.prefix, "share/sip/PyQt4"),
-                                   pjoin(sys.prefix, "sip/PyQt4"),]
+        candidate_sipfiles_dirs = [pjoin(sys.prefix, "share/sip/PyQt5"),
+                                   pjoin(sys.prefix, "sip/PyQt5"),]
         for path in candidate_sipfiles_dirs:
             if os.path.isdir(path):
                 log.info("Found sip include directory at %r" % path)
@@ -317,8 +282,8 @@ def get_source_files(path, ext="cpp", exclude=tuple()):
     return out_files
 
 
-# Used Qt4 libraries
-qt_libs = ["QtCore", "QtGui"]
+# Used Qt5 libraries
+qt_libs = ["Qt5Core", "Qt5Gui"]
 
 if site_cfg.qt_conf.framework:
     framework_dir = site_cfg.qt_conf.framework_dir
@@ -328,7 +293,6 @@ if site_cfg.qt_conf.framework:
         include_dirs += [os.path.join(framework_dir,
                                       lib + ".framework", "Headers")]
         extra_link_args += ["-framework", lib]
-    qt_libs = []
 else:
     if type(site_cfg.qt_conf.include_dir) == list:
         include_dirs = site_cfg.qt_conf.include_dir + [pjoin(d, lib) for lib in qt_libs for d in site_cfg.qt_conf.include_dir]
@@ -337,9 +301,6 @@ else:
                        [pjoin(site_cfg.qt_conf.include_dir, lib) for lib in qt_libs]
     library_dirs += site_cfg.qt_conf.library_dir
 
-if sys.platform == "win32":
-    # Qt libs on windows have a 4 added
-    qt_libs = [lib + "4" for lib in qt_libs]
 
 include_dirs += ["./", "./src"]
 source_files = get_source_files("./src", "*.cpp")
@@ -352,7 +313,7 @@ else:
 
 print('source_files', source_files)
 
-pyqthelp_ext = PyQt4Extension("pyqthelp.native",
+pyqthelp_ext = PyQt5Extension("pyqthelp.native",
                               ["pyqthelp.sip"] + source_files,
                               include_dirs=include_dirs,
                               extra_compile_args=extra_compile_args,
