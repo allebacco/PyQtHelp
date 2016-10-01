@@ -19,6 +19,8 @@ import glob
 import sipdistutils
 from PyQt5.QtCore import PYQT_CONFIGURATION
 
+from test_command import TestCommand
+
 pjoin = os.path.join
 
 NAME = 'PyQtHelp'
@@ -322,19 +324,27 @@ pyqthelp_ext = PyQt5Extension("pyqthelp.native",
                               library_dirs=library_dirs)
 
 
+cmdclass = {
+    "build_ext": build_pyqt_ext,
+    "test": TestCommand,
+}
+
+
 def setup_package():
     setup(name=NAME,
           description=DESCRIPTION,
           version=VERSION,
           author=AUTHOR,
           author_email=AUTHOR_EMAIL,
+          packages=['pyqthelp'],
           url=URL,
           license=LICENSE,
           ext_modules=[pyqthelp_ext],
-          cmdclass={"build_ext": build_pyqt_ext},
+          cmdclass=cmdclass,
           install_requires=['numpy'],
           setup_requires=['pytest-runner'],
           tests_require=['pytest'],)
+
 
 if __name__ == '__main__':
     setup_package()
