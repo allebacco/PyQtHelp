@@ -101,7 +101,6 @@ static QPainterPath arrayToQPath(const _TpX* x, const _TpY* y, const size_t size
     if(size>0)
     {
         path.moveTo(x[0], y[0]);
-        bool skip = true;
         for(size_t i=1; i<size; ++i)
         {
             if(connect[i]!=0)
