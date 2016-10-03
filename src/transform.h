@@ -5,7 +5,7 @@
 #include <QTransform>
 
 
-QTransform invertTransform(const QTransform& tr, bool* invertible);
+QTransform invertTransform(const QTransform& tr, bool* invertible=nullptr);
 
 
 #endif  // TRANSFORM_H

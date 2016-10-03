@@ -1,17 +1,19 @@
 #ifndef PAINTERPATH_H
 #define PAINTERPATH_H
 
-#include <cmath>
 #include <QPainterPath>
+#include <QTransform>
+
+#include "geometry.h"
 
 
 #if defined _MSC_VER
 #pragma message("Compiling isfinite() workaround")
 // Workaround for the absence of isfinite for integer types in MSVC
-int fpclassify(int32_t v) { return FP_NORMAL; }
-int fpclassify(uint32_t v) { return FP_NORMAL; }
-int fpclassify(int64_t v) { return FP_NORMAL; }
-int fpclassify(uint64_t v) { return FP_NORMAL; }
+static int fpclassify(int32_t v) { return FP_NORMAL; }
+static int fpclassify(uint32_t v) { return FP_NORMAL; }
+static int fpclassify(int64_t v) { return FP_NORMAL; }
+static int fpclassify(uint64_t v) { return FP_NORMAL; }
 #endif
 
 
@@ -103,7 +105,7 @@ static QPainterPath arrayToQPath(const _TpX* x, const _TpY* y, const size_t size
         path.moveTo(x[0], y[0]);
         for(size_t i=1; i<size; ++i)
         {
-            if(connect[i]!=0)
+            if(connect[i-1]!=0)
                 path.lineTo(x[i], y[i]);
             else
                 path.moveTo(x[i], y[i]);
@@ -111,6 +113,10 @@ static QPainterPath arrayToQPath(const _TpX* x, const _TpY* y, const size_t size
     }
     return path;
 }
+
+
+QPainterPath arrayToQPathOptimized(const double* x, const double* y, const size_t size, const uint8_t* connect,
+                                   const QTransform& tr, const double lineWidth=1.);
 
 
 #endif  // PAINTERPATH_H

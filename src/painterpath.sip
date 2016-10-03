@@ -139,3 +139,44 @@ QPainterPath arrayToQPath(PyObject* x, PyObject* y, PyObject* connect=Py_None);
     }
 
 %End
+
+
+QPainterPath arrayToQPathOptimized(PyObject* x, PyObject* y, PyObject* connect, const QTransform& tr, const double lineWidth=1.);
+%MethodCode
+    PyObject* pyX = a0;
+    PyObject* pyY = a1;
+    PyObject* pyConnect = a2;
+
+    const QTransform tr(*a3);
+    const double lineWidth = a4;
+
+    try {
+        NDArray x(pyX);
+        NDArray y(pyY);
+        NDArray connectArray(pyConnect);
+
+        if(x.ndims()!=1 || y.ndims()!=1)
+            throw std::runtime_error("x and y must be monodimensional");
+
+        if(x.shape(0)!=y.shape(0))
+            throw std::runtime_error("x and y must have the same size");
+
+        if(connectArray.ndims()!=1 || connectArray.shape(0)!=x.shape(0)-1)
+            throw std::runtime_error("connect must be a monodimensional array of size x.size-1");
+
+        if(x.dtype()!=NPY_INT64 || y.dtype()!=NPY_FLOAT64)
+            throw std::runtime_error("x and y must be float64 arrays");
+            
+        if(connectArray.dtype()!=NPY_UINT8 && connectArray.dtype()!=NPY_INT8 &&
+           connectArray.dtype()!=NPY_BOOL)
+            throw std::runtime_error("connect must be a bool array");
+
+        const size_t size = x.shape(0);
+
+        sipRes = new QPainterPath(arrayToQPathOptimized(x.data<double>(), y.data<double>(), size, connectArray.data<uint8_t>(), tr, lineWidth));
+
+    } catch(const std::runtime_error& err) {
+        PyErr_SetString(PyExc_RuntimeError, err.what());
+        return nullptr;
+    }
+%End
