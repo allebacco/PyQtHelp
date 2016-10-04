@@ -164,7 +164,7 @@ QPainterPath arrayToQPathOptimized(PyObject* x, PyObject* y, PyObject* connect, 
         if(connectArray.ndims()!=1 || connectArray.shape(0)!=x.shape(0)-1)
             throw std::runtime_error("connect must be a monodimensional array of size x.size-1");
 
-        if(x.dtype()!=NPY_INT64 || y.dtype()!=NPY_FLOAT64)
+        if(x.dtype()!=NPY_FLOAT64 || y.dtype()!=NPY_FLOAT64)
             throw std::runtime_error("x and y must be float64 arrays");
             
         if(connectArray.dtype()!=NPY_UINT8 && connectArray.dtype()!=NPY_INT8 &&

@@ -9,12 +9,14 @@ QPainterPath arrayToQPathOptimized(const double* x, const double* y, const size_
         return path;
 
     const double minDistance = std::max(1.0, lineWidth);
-    path.moveTo(x[0], y[0]);
+    QPointF lastPoint(x[0], y[0]);
+    lastPoint = tr.map(lastPoint);
+    path.moveTo(lastPoint);
     bool forcepoint = true;
-    QPointF lastPoint;
     for(size_t i=1; i<size; ++i)
     {
         QPointF currPoint(x[i], y[i]);
+        currPoint = tr.map(currPoint);
 
         if(connect[i-1]==0)
         {
