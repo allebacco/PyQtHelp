@@ -12,8 +12,9 @@ QPainterPath arrayToQPathOptimized(const double* x, const double* y, const size_
     QPointF lastPoint(x[0], y[0]);
     lastPoint = tr.map(lastPoint);
     path.moveTo(lastPoint);
-    bool forcepoint = true;
-    for(size_t i=1; i<size; ++i)
+    bool forcepoint = false;
+    const size_t count = size-1;
+    for(size_t i=1; i<count; ++i)
     {
         QPointF currPoint(x[i], y[i]);
         currPoint = tr.map(currPoint);
@@ -39,6 +40,10 @@ QPainterPath arrayToQPathOptimized(const double* x, const double* y, const size_
             lastPoint = currPoint;
         }
     }
+
+    // Add the last point
+    if(connect[count-1])
+        path.lineTo(tr.map(QPointF(x[count], y[count])));
 
     return path;
 }
