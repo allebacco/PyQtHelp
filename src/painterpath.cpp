@@ -1,6 +1,21 @@
 #include "painterpath.h"
 #include "geometry.h"
 
+
+PathConnect decodeConnect(const QString& connect, const PathConnect defaultvalue)
+{
+    if(connect=="all")
+        return PathConnect::All;
+    if(connect=="finite")
+        return PathConnect::Finite;
+    if(connect=="pairs")
+        return PathConnect::Pairs;
+
+    return defaultvalue;
+}
+
+
+
 QPainterPath arrayToQPathOptimized(const double* x, const double* y, const size_t size, const uint8_t* connect,
                                    const QTransform& tr, const double lineWidth)
 {

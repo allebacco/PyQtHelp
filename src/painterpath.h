@@ -3,6 +3,7 @@
 
 #include <QPainterPath>
 #include <QTransform>
+#include <QString>
 
 #include "geometry.h"
 
@@ -24,6 +25,8 @@ enum class PathConnect
     Finite,
     Pairs
 };
+
+PathConnect decodeConnect(const QString& connect, const PathConnect defaultvalue=PathConnect::All);
 
 
 template<typename _TpX, typename _TpY>

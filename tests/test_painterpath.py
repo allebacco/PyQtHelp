@@ -8,6 +8,9 @@ import pyqthelp as ph
 
 ARRAY_X_DATA = np.arange(100)
 ARRAY_Y_DATA = np.random.rand(100) * 100.
+CONNECT_ALL = np.ones(ARRAY_X_DATA.size, dtype=np.bool)
+CONNECT_NOT_ALL = CONNECT_ALL.copy()
+CONNECT_NOT_ALL[::5] = 0
 
 
 def create_qpainterpath(x, y, connect):
@@ -61,6 +64,29 @@ def assert_path_equals(path1, path2):
 @pytest.mark.parametrize('y', [ARRAY_Y_DATA])
 @pytest.mark.parametrize('connect', ['all', 'finite', 'pairs'])
 def test_arrayToQPath_str(xtype, ytype, x, y, connect):
+
+    x = x.astype(xtype)
+    y = y.astype(ytype)
+
+    test_path = ph.native.arrayToQPath(x, y, connect)
+    ref_path = create_qpainterpath(x, y, connect)
+
+    assert_path_equals(test_path, ref_path)
+
+
+@pytest.mark.parametrize('xtype,ytype', [
+    (np.float64, np.float64),
+    (np.float32, np.float32),
+    (np.int64, np.float64),
+    (np.int64, np.int64),
+    (np.int32, np.int32),
+    (np.uint64, np.uint64),
+    (np.uint32, np.uint32),
+])
+@pytest.mark.parametrize('x', [ARRAY_X_DATA])
+@pytest.mark.parametrize('y', [ARRAY_Y_DATA])
+@pytest.mark.parametrize('connect', [CONNECT_ALL, CONNECT_NOT_ALL])
+def test_arrayToQPath_connect_array(xtype, ytype, x, y, connect):
 
     x = x.astype(xtype)
     y = y.astype(ytype)
