@@ -4,6 +4,7 @@ import os
 import sys
 import shlex
 import fnmatch
+import subprocess
 from collections import namedtuple
 try:
     from ConfigParser import SafeConfigParser
@@ -55,7 +56,7 @@ if 'QMAKE' in os.environ:
     qt_qmake = os.environ['QMAKE']
 
 # if QTDIR env is defined use it
-if "QTDIR" in os.environ:
+if "QTDIR" in os.environ and len(os.environ["QTDIR"]) > 0:
     qt_dir = os.environ["QTDIR"]
     if sys.platform == "darwin":
         if glob.glob(pjoin(qt_dir, "lib", "Qt*.framework")):
@@ -82,7 +83,7 @@ if qt_framework is False:
     print(sys.version.lower())
     if 'anaconda' in sys.version.lower():
         # We are in the Continuum Analytics' Anaconda environment
-        # and it is possible to autodetect Qt4 configuration
+        # and it is possible to autodetect Qt5 configuration
         print('Detected Anaconda environment')
         qt_conf_filename = pjoin(sys.prefix, 'qt.conf')
         conf_parser = SafeConfigParser()
@@ -96,6 +97,22 @@ if qt_framework is False:
             qt_moc = pjoin(qt_bin_dir, 'moc')
         if qt_qmake is None:
             qt_qmake = pjoin(qt_bin_dir, 'qmake')
+    elif 'posix' in os.name:
+        # We are in the Linux environment
+        # and it is possible to autodetect Qt5 configuration
+        print('Detected Linux environment')
+        output = subprocess.getoutput(qt_qmake + ' -query')
+        output = output.split('\n')
+        output = {s[0]: s[1] for s in (o.split(':') for o in output)}
+
+        qt_dir = output['QT_INSTALL_PREFIX']
+        qt_include_dir = output['QT_INSTALL_HEADERS']
+        qt_lib_dir = output['QT_INSTALL_LIBS']
+        qt_bin_dir = output['QT_INSTALL_BINS']
+        #qt_framework = True
+        qt_framework_dir = output['QT_INSTALL_PREFIX']
+        qt_moc = os.path.join(qt_bin_dir, qt_moc)
+        qt_qmake = os.path.join(qt_bin_dir, qt_qmake)
 
 
 def which(name):
