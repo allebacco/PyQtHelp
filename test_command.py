@@ -26,6 +26,7 @@ class TestCommand(Command):
             raise RuntimeError('Unable to build the library for testing')
 
     def run(self):
+        os.environ['PYTEST_QT_API'] = 'pyqt5'
         import pytest
 
         self._build_extension()
