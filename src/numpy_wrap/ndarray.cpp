@@ -3,12 +3,21 @@
 
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #define PY_ARRAY_UNIQUE_SYMBOL  numpy_ARRAY_API
-#define NO_IMPORT_ARRAY
+#ifdef NO_IMPORT_ARRAY:
+    #undef NO_IMPORT_ARRAY
+#endif
 #include <numpy/arrayobject.h>
 
 #include "ndarray.h"
 
 #include <vector>
+
+
+int NDArray::import_numpy()
+{
+    int ret = _import_array();
+    return ret;
+}
 
 void NDArray::acquire(PyObject* ndarray)
 {
@@ -57,4 +66,22 @@ NDArray NDArray::empty_like(const NDArray& other, int typenum)
     Py_XDECREF(py_out);
 
     return out;
+}
+
+
+bool NDArray::is_valid_array(PyObject* ndarray)
+{
+    if(ndarray==nullptr)
+        return true;
+
+    if(ndarray==Py_None)
+        return true;
+
+    if(!PyArray_Check(ndarray))
+        return false;
+
+    if(PyArray_IS_C_CONTIGUOUS((PyArrayObject*)ndarray)==0)
+        return false;
+
+    return true;
 }

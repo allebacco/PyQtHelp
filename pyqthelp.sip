@@ -1,27 +1,24 @@
-%Module native
+%Module(name=native, keyword_arguments="Optional")
 
 %Import QtCore/QtCoremod.sip
 %Import QtGui/QtGuimod.sip
 
 
 %ModuleCode
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-#define PY_ARRAY_UNIQUE_SYMBOL numpy_ARRAY_API
-#include <numpy/arrayobject.h>
 
-void init_package()
-{
-    int ret = _import_array();
-}
+#include "numpy_wrap/ndarray.h"
 
 %End
 
 %PostInitialisationCode
-init_package();
+
+NDArray::import_numpy();
+
 %End
 
 
 
 %Include src/exceptions.sip
+%Include src/numpy_wrap/ndarray.sip
 %Include src/transform.sip
 %Include src/painterpath.sip

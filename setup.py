@@ -80,7 +80,6 @@ if "QTDIR" in os.environ and len(os.environ["QTDIR"]) > 0:
 
 if qt_framework is False:
     # Detect failed: try to force autodetect
-    print(sys.version.lower())
     if 'anaconda' in sys.version.lower():
         # We are in the Continuum Analytics' Anaconda environment
         # and it is possible to autodetect Qt5 configuration
@@ -194,7 +193,6 @@ def site_config():
     return conf
 
 site_cfg = site_config()
-print('site_cfg', site_cfg)
 
 if sys.platform == "darwin":
     sip_plaftorm_tag = "WS_MACX"
@@ -219,7 +217,7 @@ class build_pyqt_ext(sipdistutils.build_ext):
     def finalize_options(self):
         sipdistutils.build_ext.finalize_options(self)
         self.sip_opts = self.sip_opts + site_cfg.pyqt_conf.sip_flags
-        self.sip_opts += ['-I./src ', '-e']
+        self.sip_opts += ['-I./src ', '-I./src/numpy_wrap ', '-e']
 
         import numpy
         self.sip_opts += ['-I%s ' % numpy.get_include()]
@@ -321,7 +319,7 @@ else:
     library_dirs += site_cfg.qt_conf.library_dir
 
 
-include_dirs += ["./", "./src"]
+include_dirs += ["./", "./src", './src/numpy_wrap']
 source_files = get_source_files("./src", "*.cpp")
 print('Cpp source files:', source_files)
 
@@ -329,8 +327,6 @@ if os.name == "nt":
     extra_compile_args += ['/fp:precise']
 else:
     extra_compile_args += ['-std=c++11']
-
-print('source_files', source_files)
 
 pyqthelp_ext = PyQt5Extension("pyqthelp.native",
                               ["pyqthelp.sip"] + source_files,

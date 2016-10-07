@@ -3,6 +3,8 @@
 
 #include <Python.h>
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#define PY_ARRAY_UNIQUE_SYMBOL  numpy_ARRAY_API
+#define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
 #include <stdexcept>
@@ -119,7 +121,15 @@ public:
 
     NDArray convertTo(const int typenum) const;
 
+    PyObject* handle() const { return mNdArray; }
+
+public:
+
     static NDArray empty_like(const NDArray& other, int typenum=NPY_VOID); 
+
+    static bool is_valid_array(PyObject* ndarray);
+
+    static int import_numpy();
 
 protected:
 
