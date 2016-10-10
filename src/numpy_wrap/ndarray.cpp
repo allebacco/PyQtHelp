@@ -3,7 +3,7 @@
 
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #define PY_ARRAY_UNIQUE_SYMBOL  numpy_ARRAY_API
-#ifdef NO_IMPORT_ARRAY:
+#ifdef NO_IMPORT_ARRAY
     #undef NO_IMPORT_ARRAY
 #endif
 #include <numpy/arrayobject.h>
@@ -60,7 +60,31 @@ NDArray NDArray::empty_like(const NDArray& other, int typenum)
     for(size_t i=0; i<other.ndims(); ++i)
         dims.push_back(other.shape(i));
 
-    PyObject* py_out = PyArray_EMPTY(static_cast<int>(other.ndims()), dims.data(), typenum, 0);
+    return empty(dims, typenum);
+}
+
+
+NDArray NDArray::empty(const size_t dim0, const size_t dim1, const int typenum)
+{
+    const std::vector<npy_intp> dims {static_cast<npy_intp>(dim0),
+                                      static_cast<npy_intp>(dim1)};
+    return empty(dims, typenum);
+}
+
+
+NDArray NDArray::empty(const size_t dim0, const size_t dim1, const size_t dim2, const int typenum)
+{
+    const std::vector<npy_intp> dims {static_cast<npy_intp>(dim0),
+                                      static_cast<npy_intp>(dim1),
+                                      static_cast<npy_intp>(dim2)};
+    return empty(dims, typenum);
+}
+
+
+NDArray NDArray::empty(const std::vector<npy_intp> dims, const int typenum)
+{
+    npy_intp* dimsData = const_cast<npy_intp*>(dims.data());
+    PyObject* py_out = PyArray_EMPTY(static_cast<int>(dims.size()), dimsData, typenum, 0);
     NDArray out(py_out);
     // release a reference because the NDArray has already taken one
     Py_XDECREF(py_out);

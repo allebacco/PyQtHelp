@@ -1,2 +1,2 @@
 
-from .native import invertTransform, arrayToTransform
+from .native import invertTransform, arrayToTransform, transformToArray

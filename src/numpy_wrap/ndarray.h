@@ -8,6 +8,7 @@
 #include <numpy/arrayobject.h>
 
 #include <stdexcept>
+#include <vector>
 
 /*!
  * \brief C++ wrapper around the numpy.ndarray object
@@ -181,7 +182,13 @@ public:
      * \param typenum Requested dtype. NPY_VOID for using other dtype
      * \returns Array with the same shape of the input array and the requested type
      */
-    static NDArray empty_like(const NDArray& other, int typenum=NPY_VOID); 
+    static NDArray empty_like(const NDArray& other, int typenum=NPY_VOID);
+
+    static NDArray empty(const size_t dim0, const size_t dim1, const int typenum);
+
+    static NDArray empty(const size_t dim0, const size_t dim1, const size_t dim2, const int typenum=NPY_DOUBLE);
+
+    static NDArray empty(const std::vector<npy_intp> dims, const int typenum=NPY_DOUBLE);
 
     /*!
      * \brief Check if input is a valid array

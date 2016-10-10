@@ -56,7 +56,38 @@ QTransform arrayToTransform(const NDArray& array);
 
     } catch(const std::runtime_error& err) {
         PyErr_SetString(PyExc_RuntimeError, err.what());
+        if(sipRes!=nullptr)
+            delete sipRes;
         sipRes = nullptr;
     }
 
 %End
+
+
+
+NDArray transformToArray(const QTransform& transform);
+%MethodCode
+    try
+    {
+        const QTransform* transform = a0;
+
+        sipRes = new NDArray(NDArray::empty(3, 3, NPY_DOUBLE));
+
+        double* data = sipRes->data<double>();
+        data[0] = transform->m11();
+        data[1] = transform->m12();
+        data[2] = transform->m13();
+        data[3] = transform->m21();
+        data[4] = transform->m22();
+        data[5] = transform->m23();
+        data[6] = transform->m31();
+        data[7] = transform->m32();
+        data[8] = transform->m33();
+
+    } catch(const std::runtime_error& err) {
+        PyErr_SetString(PyExc_RuntimeError, err.what());
+        sipRes = nullptr;
+    }
+
+%End
+

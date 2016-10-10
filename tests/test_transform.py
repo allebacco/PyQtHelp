@@ -72,3 +72,11 @@ def test_arrayToTransform(data, dtype):
     test_transform = ph.transform.arrayToTransform(data)
 
     assert ref_transform == test_transform
+
+
+@pytest.mark.parametrize('data', [ARRAY_DATA_1, IDENTITY_DATA])
+def test_transformToArray(data):
+    ref_data = np.array(data, dtype=np.float64)
+    test_data = ph.transform.transformToArray(make_transform(data))
+
+    assert np.all(ref_data == test_data)
