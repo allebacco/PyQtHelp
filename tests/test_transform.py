@@ -13,18 +13,6 @@ def assert_transform_array_equals(qtransform, ndarray):
     assert isinstance(qtransform, QTransform)
     assert isinstance(ndarray, np.ndarray)
 
-    print(qtransform.m11() - ndarray[0, 0])
-    print(qtransform.m12() - ndarray[0, 1])
-    print(qtransform.m13() - ndarray[0, 2])
-
-    print(qtransform.m21() - ndarray[1, 0])
-    print(qtransform.m22() - ndarray[1, 1])
-    print(qtransform.m23() - ndarray[1, 2])
-
-    print(qtransform.m31() - ndarray[2, 0])
-    print(qtransform.m32() - ndarray[2, 1])
-    print(qtransform.m33() - ndarray[2, 2])
-
     assert np.abs(qtransform.m11() - ndarray[0, 0]) < 1e-13
     assert np.abs(qtransform.m12() - ndarray[0, 1]) < 1e-13
     assert np.abs(qtransform.m13() - ndarray[0, 2]) < 1e-13
@@ -74,3 +62,13 @@ def test_invert_works_correctly(data):
     assert_transform_array_equals(transform_inv, array_inv)
     assert_transform_array_equals(transform_inv2, array_inv)
 
+
+@pytest.mark.parametrize('data', [ARRAY_DATA_1, IDENTITY_DATA])
+@pytest.mark.parametrize('dtype', [np.float64, np.float32, np.int32, np.uint32, np.int64, np.uint64])
+def test_arrayToTransform(data, dtype):
+    data = np.array(data, dtype=dtype)
+
+    ref_transform = make_transform(data)
+    test_transform = ph.transform.arrayToTransform(data)
+
+    assert ref_transform == test_transform
