@@ -29,6 +29,14 @@ enum class PathConnect
 PathConnect decodeConnect(const QString& connect, const PathConnect defaultvalue=PathConnect::All);
 
 
+/*!
+ * \brief Build a path for the input data by connecting all the points
+ * \tparam _TpX Type of the input data
+ * \param x Input x data
+ * \param y Input y data
+ * \param size number of elements of the input data
+ * \param[out] The path for drawing the input data
+ */
 template<typename _TpX, typename _TpY>
 static void arrayToQPathAll(const _TpX* x, const _TpY* y, const size_t size, QPainterPath& path)
 {
@@ -39,13 +47,12 @@ static void arrayToQPathAll(const _TpX* x, const _TpY* y, const size_t size, QPa
 
 
 /*!
- * \brief Build a path for the input data by connecting only finite points
- * When a not finite point is found, the line is trucated
+ * \brief Build a path for the input data by connecting pairs of points
  * \tparam _TpX Type of the input data
  * \param x Input x data
  * \param y Input y data
  * \param size number of elements of the input data
- * \returns The path for drawing the input data
+ * \param[out] The path for drawing the input data
  */
 template<typename _TpX, typename _TpY>
 static void arrayToQPathPairs(const _TpX* x, const _TpY* y, const size_t size, QPainterPath& path)
