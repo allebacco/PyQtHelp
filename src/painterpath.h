@@ -9,7 +9,7 @@
 
 
 #if defined _MSC_VER
-#pragma message("Compiling isfinite() workaround")
+#pragma message("Compiling fpclassify() workaround")
 // Workaround for the absence of isfinite for integer types in MSVC
 static int fpclassify(int32_t v) { return FP_NORMAL; }
 static int fpclassify(uint32_t v) { return FP_NORMAL; }
@@ -21,9 +21,9 @@ static int fpclassify(uint64_t v) { return FP_NORMAL; }
 
 enum class PathConnect
 {
-    All,
-    Finite,
-    Pairs
+    All,    ///< Connect all points
+    Finite, ///< Connect only finite points
+    Pairs   ///< Connect pairs of points
 };
 
 PathConnect decodeConnect(const QString& connect, const PathConnect defaultvalue=PathConnect::All);
@@ -38,6 +38,15 @@ static void arrayToQPathAll(const _TpX* x, const _TpY* y, const size_t size, QPa
 }
 
 
+/*!
+ * \brief Build a path for the input data by connecting only finite points
+ * When a not finite point is found, the line is trucated
+ * \tparam _TpX Type of the input data
+ * \param x Input x data
+ * \param y Input y data
+ * \param size number of elements of the input data
+ * \returns The path for drawing the input data
+ */
 template<typename _TpX, typename _TpY>
 static void arrayToQPathPairs(const _TpX* x, const _TpY* y, const size_t size, QPainterPath& path)
 {
@@ -53,11 +62,18 @@ static void arrayToQPathPairs(const _TpX* x, const _TpY* y, const size_t size, Q
 }
 
 
+/*!
+ * \brief Build a path for the input data by connecting only finite points
+ * When a not finite point is found, the line is trucated
+ * \tparam _TpX Type of the input data
+ * \param x Input x data
+ * \param y Input y data
+ * \param size number of elements of the input data
+ * \param[out] The path for drawing the input data
+ */
 template<typename _TpX, typename _TpY>
 static void arrayToQPathFinite(const _TpX* x, const _TpY* y, const size_t size, QPainterPath& path)
 {
-    //using std::isfinite;
-
     bool skip = true;
     for(size_t i=0; i<size; ++i)
     {
@@ -75,6 +91,15 @@ static void arrayToQPathFinite(const _TpX* x, const _TpY* y, const size_t size, 
 }
 
 
+/*!
+ * \brief Build a path for the input data
+ * \tparam _TpX Type of the input data
+ * \param x Input x data
+ * \param y Input y data
+ * \param size number of elements of the input data
+ * \param connect Connection between the input points
+ * \returns The path for drawing the input data
+ */
 template<typename _TpX, typename _TpY>
 static QPainterPath arrayToQPath(const _TpX* x, const _TpY* y, const size_t size,
                                  const PathConnect connect=PathConnect::All)
@@ -99,6 +124,15 @@ static QPainterPath arrayToQPath(const _TpX* x, const _TpY* y, const size_t size
 }
 
 
+/*!
+ * \brief Build a path for the input data
+ * \tparam _TpX Type of the input data
+ * \param x Input x data
+ * \param y Input y data
+ * \param size number of elements of the input data
+ * \param connect Array of connections between input points
+ * \returns The path for drawing the input data
+ */
 template<typename _TpX, typename _TpY>
 static QPainterPath arrayToQPath(const _TpX* x, const _TpY* y, const size_t size, const uint8_t* connect)
 {
@@ -118,6 +152,16 @@ static QPainterPath arrayToQPath(const _TpX* x, const _TpY* y, const size_t size
 }
 
 
+/*!
+ * \brief Build an optimized path for the input data
+ * \param x Input x data
+ * \param y Input y data
+ * \param size number of elements of the input data
+ * \param connect Array of connections between input points
+ * \param tr Transform that should be applied to the input data
+ * \param lineWidth Width of teh line that will be used to draw the path
+ * \returns The optimized path for drawing the input data
+ */
 QPainterPath arrayToQPathOptimized(const double* x, const double* y, const size_t size, const uint8_t* connect,
                                    const QTransform& tr, const double lineWidth=1.);
 
