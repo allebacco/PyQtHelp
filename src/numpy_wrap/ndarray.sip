@@ -1,3 +1,10 @@
+/*!
+ * \file ndarray.sip
+ *
+ * This file contains the definition of teh mapping between a numpy.ndarray
+ * and the NDArray wrapper class.
+ */
+
 
 %MappedType NDArray
 {
@@ -8,6 +15,7 @@
 %End
 
 %ConvertFromTypeCode
+    // Convert NDArray to numpy.array Python Object
     PyObject* ret = sipCpp->handle();
 
     if(ret==nullptr)
