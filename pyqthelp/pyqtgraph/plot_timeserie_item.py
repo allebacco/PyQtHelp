@@ -1,6 +1,8 @@
 import struct
 import sys
 import numpy as np
+
+from PyQt5.Qt import pyqtSignal
 from pyqtgraph import GraphicsObject, functions, Point
 
 
@@ -23,8 +25,8 @@ class PlotTimeserieItem(GraphicsObject):
     ====================  ===============================================
     """
 
-    sigPlotChanged = QtCore.Signal(object)
-    sigClicked = QtCore.Signal(object)
+    sigPlotChanged = pyqtSignal(object)
+    sigClicked = pyqtSignal(object)
 
     def __init__(self, *args, **kargs):
         """

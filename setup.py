@@ -185,7 +185,7 @@ def site_config():
     include_dir = path_list(include_dir)
     library_dir = path_list(library_dir)
 
-    for d in ['QtCore', 'QtGui']:
+    for d in ['QtCore', 'QtGui', 'QtWidgets']:
         include_dir.append(pjoin(qt_include_dir, d))
 
     conf = config(sip_bin, pyqt_conf(sip_flags, sip_dir),
@@ -231,13 +231,17 @@ class build_pyqt_ext(sipdistutils.build_ext):
         dir_util.mkpath(self.build_temp, dry_run=self.dry_run)
 
         # Run moc on all header files.
+        moc_sources = list()
         for source in cppsources:
             header = source.replace(".cpp", ".h")
             if os.path.exists(header):
-                moc_file = os.path.basename(header).replace(".h", ".moc")
+                moc_file = os.path.basename(header).replace(".h", ".moc.cpp")
                 out_file = os.path.join(self.build_temp, moc_file)
                 call_arg = [qt_moc, "-o", out_file, header]
                 spawn.spawn(call_arg, dry_run=self.dry_run)
+                moc_sources.append(out_file)
+
+        ext.sources += moc_sources
 
         import numpy
         # Add the temp build directory to include path, for compiler to find
@@ -300,7 +304,7 @@ def get_source_files(path, ext="cpp", exclude=tuple()):
 
 
 # Used Qt5 libraries
-qt_libs = ["Qt5Core", "Qt5Gui"]
+qt_libs = ["Qt5Core", "Qt5Gui", "Qt5Widgets"]
 
 if site_cfg.qt_conf.framework:
     framework_dir = site_cfg.qt_conf.framework_dir
@@ -328,13 +332,16 @@ if os.name == "nt":
 else:
     extra_compile_args += ['-std=c++11']
 
+define_macros = [('QT_NO_KEYWORDS', '1'), ]
+
 pyqthelp_ext = PyQt5Extension("pyqthelp.native",
                               ["pyqthelp.sip"] + source_files,
                               include_dirs=include_dirs,
                               extra_compile_args=extra_compile_args,
                               extra_link_args=extra_link_args,
                               libraries=qt_libs,
-                              library_dirs=library_dirs)
+                              library_dirs=library_dirs,
+                              define_macros=define_macros)
 
 
 cmdclass = {
