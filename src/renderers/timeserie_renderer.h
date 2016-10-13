@@ -6,12 +6,9 @@
 #include <QObject>
 #include <QPointF>
 #include <QPen>
+#include <QPainter>
 
 #include "../numpy_wrap/ndarray.h"
-
-class QPainter;
-class QStyleOptionGraphicsItem;
-class QWidget;
 
 
 class TimeserieRenderer: public QObject
@@ -26,10 +23,7 @@ public:
 
     void setPen(const QPen& newPen);
 
-    void render(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget=nullptr);
-
-
-protected:
+    void render(QPainter* painter);
 
     void invalidate();
 
@@ -37,6 +31,7 @@ protected:
 
     std::vector<QPointF> mPoints;
     QPen mPen;
+    QPainterPath mPath;
 
 };
 

@@ -1,13 +1,11 @@
 #include "timeserie_renderer.h"
 
-#include <QPainter>
-#include <QStyleOptionGraphicsItem>
-#include <QWidget>
+#include <QTransform>
 
 
 TimeserieRenderer::TimeserieRenderer(QObject* parent) : QObject(parent)
 {
-
+    mPath = QPainterPath();
 }
 
 
@@ -48,13 +46,42 @@ void TimeserieRenderer::setPen(const QPen& newPen)
 }
 
 
-void TimeserieRenderer::render(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+void TimeserieRenderer::render(QPainter* painter)
 {
+    // Extract painter transform
+    const QTransform wTransform = painter->worldTransform();
+    const QTransform transform = wTransform.inverted();
+    const QPoint pos = transform.map(painter->window().topLeft());
+    //transform.translate(pos.x(), pos.y());
+    
+    // Save transformation and disable it before painting to speedup
+    const bool isViewTransformEnabled = painter->viewTransformEnabled();
+    const bool isWorldTransformEnabled = painter->worldMatrixEnabled();
+    painter->setViewTransformEnabled(false);
+    painter->setWorldMatrixEnabled(false);
 
+    const size_t size = mPoints.size();
+    if(mPath.isEmpty() && size>0)
+    {
+        QPointF p = transform.map(mPoints[0]) - pos;
+        mPath.moveTo(p);
+        for (size_t i=1; i<size; ++i)
+        {
+            p = transform.map(mPoints[i]) - pos;
+            mPath.lineTo(p);
+        }
+    }
+
+    painter->setPen(mPen);
+    painter->drawPath(mPath);
+
+    // Restore painter transform
+    painter->setViewTransformEnabled(isViewTransformEnabled);
+    painter->setWorldMatrixEnabled(isWorldTransformEnabled);
 }
 
 
 void TimeserieRenderer::invalidate()
 {
-
+    mPath = QPainterPath();
 }

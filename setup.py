@@ -323,7 +323,7 @@ else:
     library_dirs += site_cfg.qt_conf.library_dir
 
 
-include_dirs += ["./", "./src", './src/numpy_wrap']
+include_dirs += ["./", "./src", './src/numpy_wrap', './src/renderers']
 source_files = get_source_files("./src", "*.cpp")
 print('Cpp source files:', source_files)
 

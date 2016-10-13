@@ -22,3 +22,4 @@ NDArray::import_numpy();
 %Include src/numpy_wrap/ndarray.sip
 %Include src/transform.sip
 %Include src/painterpath.sip
+%Include src/renderers/timeserie_renderer.sip
