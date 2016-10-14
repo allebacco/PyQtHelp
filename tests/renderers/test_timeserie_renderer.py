@@ -13,7 +13,7 @@ def create_reference_image(dataX, dataY, size, pen, fill=Qt.black,
                            transform=None, viewport=None):
     image = QImage(size[0], size[1], QImage.Format_ARGB32)
     image.fill(Qt.black)
-    
+
     painter = QPainter()
     painter.begin(image)
     painter.setPen(pen)

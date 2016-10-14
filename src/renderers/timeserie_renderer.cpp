@@ -49,11 +49,8 @@ void TimeserieRenderer::setPen(const QPen& newPen)
 void TimeserieRenderer::render(QPainter* painter)
 {
     // Extract painter transform
-    const QTransform wTransform = painter->worldTransform();
-    const QTransform transform = wTransform.inverted();
-    const QPoint pos = transform.map(painter->window().topLeft());
-    //transform.translate(pos.x(), pos.y());
-    
+    const QTransform transform = painter->combinedTransform();
+
     // Save transformation and disable it before painting to speedup
     const bool isViewTransformEnabled = painter->viewTransformEnabled();
     const bool isWorldTransformEnabled = painter->worldMatrixEnabled();
@@ -63,11 +60,11 @@ void TimeserieRenderer::render(QPainter* painter)
     const size_t size = mPoints.size();
     if(mPath.isEmpty() && size>0)
     {
-        QPointF p = transform.map(mPoints[0]) - pos;
+        QPointF p = transform.map(mPoints[0]);
         mPath.moveTo(p);
         for (size_t i=1; i<size; ++i)
         {
-            p = transform.map(mPoints[i]) - pos;
+            p = transform.map(mPoints[i]);
             mPath.lineTo(p);
         }
     }
