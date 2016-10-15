@@ -4,6 +4,7 @@
 #include <QPainterPath>
 #include <QTransform>
 #include <QString>
+#include <QPointF>
 
 #include "geometry.h"
 
@@ -171,6 +172,18 @@ static QPainterPath arrayToQPath(const _TpX* x, const _TpY* y, const size_t size
  */
 QPainterPath arrayToQPathOptimized(const double* x, const double* y, const size_t size, const uint8_t* connect,
                                    const QTransform& tr, const double lineWidth=1.);
+
+/*!
+ * \brief Build an optimized path for the input data
+ * \param xy Input data
+ * \param size number of elements of the input data
+ * \param connect Array of connections between input points
+ * \param tr Transform that should be applied to the input data
+ * \param lineWidth Width of teh line that will be used to draw the path
+ * \returns The optimized path for drawing the input data
+ */
+QPainterPath arrayToQPathOptimized(const QPointF* xy, const size_t size, const uint8_t* connect,
+                                   const QTransform& tr, const double lineWidth=1.);                                   
 
 
 #endif  // PAINTERPATH_H

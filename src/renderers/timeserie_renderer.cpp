@@ -1,6 +1,9 @@
 #include "timeserie_renderer.h"
 
+#include <algorithm>
 #include <QTransform>
+
+#include "../painterpath.h"
 
 
 TimeserieRenderer::TimeserieRenderer(QObject* parent) : QObject(parent)
@@ -35,6 +38,9 @@ void TimeserieRenderer::setData(const NDArray& x, const NDArray& y) noexcept(fal
     for(size_t i=0; i<size; ++i)
         mPoints.push_back(QPointF(xData[i], yData[i]));
 
+    mConnect.resize(size, 1);
+    std::fill(mConnect.begin(), mConnect.end(), 1);
+
     invalidate();
 }
 
@@ -60,13 +66,7 @@ void TimeserieRenderer::render(QPainter* painter)
     const size_t size = mPoints.size();
     if(mPath.isEmpty() && size>0)
     {
-        QPointF p = transform.map(mPoints[0]);
-        mPath.moveTo(p);
-        for (size_t i=1; i<size; ++i)
-        {
-            p = transform.map(mPoints[i]);
-            mPath.lineTo(p);
-        }
+        mPath = arrayToQPathOptimized(mPoints.data(), size, mConnect.data(), transform, mPen.width());
     }
 
     painter->setPen(mPen);

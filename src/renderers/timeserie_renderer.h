@@ -30,6 +30,7 @@ public:
 protected:
 
     std::vector<QPointF> mPoints;
+    std::vector<uint8_t> mConnect;
     QPen mPen;
     QPainterPath mPath;
 
