@@ -11,7 +11,7 @@ try:
 except ImportError:
     from configparser import SafeConfigParser
 
-from setuptools import setup
+from setuptools import setup, find_packages
 from distutils.core import Extension
 from distutils import dir_util, spawn, log
 
@@ -356,7 +356,7 @@ def setup_package():
           version=VERSION,
           author=AUTHOR,
           author_email=AUTHOR_EMAIL,
-          packages=['pyqthelp'],
+          packages=find_packages(exclude=['src', 'tests', 'examples']),
           url=URL,
           license=LICENSE,
           ext_modules=[pyqthelp_ext],
